@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 
 interface BaseMessage {
   id: number;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   time: string;
-  isProcessMessage: boolean;
 }
 
 export interface TextChatMessage extends BaseMessage {
@@ -49,7 +48,7 @@ export const useChatStore = defineStore("chat", {
       const newChat: ChatHistory = {
         id: now.getTime(),
         date: now.toLocaleDateString(),
-        title: "新聊天",
+        title: "新對話",
         messages: [],
         lastMessageTime: this.formatTime(now),
       };
@@ -67,9 +66,11 @@ export const useChatStore = defineStore("chat", {
           ...message,
           id: Date.now(),
           time: this.formatTime(now),
-          isNewMessage: message.type === "text" ? message.isNewMessage : undefined,
-          isProcessMessage: message.isProcessMessage ?? false,
-        } as ChatMessage;
+        };
+
+        if (newMessage.type === "text" && "isNewMessage" in message) {
+          (newMessage as TextChatMessage).isNewMessage = message.isNewMessage;
+        }
 
         chat.messages.push(newMessage);
         chat.lastMessageTime = newMessage.time;

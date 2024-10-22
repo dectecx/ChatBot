@@ -1,6 +1,6 @@
 <template>
   <div :class="['message', role]">
-    <div v-if="role === 'assistant'" class="assistant-icon">
+    <div v-if="role !== 'user'" class="assistant-icon">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
       </svg>
@@ -9,7 +9,7 @@
       <div class="message-content">
         <span v-if="role === 'user' || !isNewMessage">{{ content }}</span>
         <span v-else>{{ displayedContent }}</span>
-        <FeedbackSection v-if="role === 'assistant'" :isVisible="isTypingComplete" :messageId="messageId" :isProcessMessage="isProcessMessage" />
+        <FeedbackSection v-if="role === 'assistant' && isTypingComplete" :messageId="messageId" />
       </div>
       <div class="message-time">{{ time }}</div>
     </div>
@@ -21,12 +21,11 @@ import { ref, onMounted, watch, onUnmounted } from "vue";
 import FeedbackSection from "../FeedbackSection.vue";
 
 const props = defineProps<{
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   time: string;
   isNewMessage: boolean;
   messageId: number;
-  isProcessMessage: boolean;
 }>();
 
 const displayedContent = ref("");
@@ -81,18 +80,6 @@ onUnmounted(() => {
     clearInterval(typingInterval);
   }
 });
-
-const feedbackGiven = ref(false);
-const feedbackResponse = ref("");
-
-const giveFeedback = (isHelpful: boolean) => {
-  feedbackGiven.value = true;
-  if (isHelpful) {
-    feedbackResponse.value = "非常感謝您的支持！我會持續努力提供更好的服務。";
-  } else {
-    feedbackResponse.value = "感謝您的回饋，請提供建議";
-  }
-};
 </script>
 
 <style scoped>
@@ -104,11 +91,17 @@ const giveFeedback = (isHelpful: boolean) => {
   border-bottom-right-radius: 0;
 }
 
-.assistant .message-content {
+.assistant .message-content,
+.system .message-content {
   background-color: white;
   color: black;
   border-bottom-left-radius: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.system .message-content {
+  background-color: #f0f0f0;
+  font-style: italic;
 }
 
 .user .message-time {

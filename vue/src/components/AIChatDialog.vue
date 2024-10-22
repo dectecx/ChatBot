@@ -41,7 +41,6 @@
                 :time="message.time"
                 :isNewMessage="message.isNewMessage ?? false"
                 :messageId="message.id"
-                :isProcessMessage="message.isProcessMessage"
               />
               <ButtonMessageComponent
                 v-else-if="message.type === 'button'"
@@ -49,7 +48,7 @@
                 :time="message.time"
                 :buttons="message.buttons"
                 :messageId="message.id"
-                :isProcessMessage="message.isProcessMessage"
+                :role="message.role"
                 @button-click="handleButtonClick"
               />
             </template>
@@ -161,19 +160,17 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
 
     if (chatStore.currentChatId) {
       chatStore.addMessage(chatStore.currentChatId, {
-        role: "assistant",
+        role: "system",
         type: "text",
         content: "對話框已顯示。您可以繼續對話。",
-        isProcessMessage: false,
       });
     }
   } else if (button.action === "process") {
     if (chatStore.currentChatId) {
       chatStore.addMessage(chatStore.currentChatId, {
-        role: "assistant",
+        role: "system",
         type: "text",
         content: `開始 ${button.payload} 流程`,
-        isProcessMessage: true,
       });
     }
   }
@@ -197,7 +194,6 @@ const sendMessage = () => {
     role: "user",
     type: "text",
     content: userInput.value,
-    isProcessMessage: false,
   });
   userInput.value = "";
 
@@ -219,7 +215,6 @@ const sendMessage = () => {
           type: "text",
           content: "這是一個模擬的 AI 文字回應。",
           isNewMessage: true,
-          isProcessMessage: false,
         };
         chatStore.addMessage(chatStore.currentChatId, newMessage);
       } else {
@@ -231,7 +226,6 @@ const sendMessage = () => {
             { text: "顯示對話框", action: "dialog", payload: "這是一個對話框訊息" },
             { text: "開始特定流程", action: "process", payload: "特定" },
           ],
-          isProcessMessage: false,
         };
         chatStore.addMessage(chatStore.currentChatId, buttonMessage);
       }
@@ -257,10 +251,9 @@ const cancelResponse = () => {
   if (isWaitingForResponse.value) {
     if (chatStore.currentChatId) {
       chatStore.addMessage(chatStore.currentChatId, {
-        role: "assistant",
+        role: "system",
         type: "text",
         content: "回覆已被使用者中斷。",
-        isProcessMessage: false,
       });
     }
     isWaitingForResponse.value = false;

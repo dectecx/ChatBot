@@ -1,6 +1,6 @@
 <template>
-  <div class="message assistant">
-    <div class="assistant-icon">
+  <div :class="['message', role]">
+    <div v-if="role === 'assistant'" class="assistant-icon">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
       </svg>
@@ -9,11 +9,11 @@
       <div class="message-content">
         <p>{{ content }}</p>
         <div class="button-group">
-          <button v-for="(btn, btnIndex) in buttons" :key="btnIndex" @click="handleButtonClick(btn)">
-            {{ btn.text }}
+          <button v-for="button in buttons" :key="button.text" @click="handleButtonClick(button)">
+            {{ button.text }}
           </button>
         </div>
-        <FeedbackSection :isVisible="isContentComplete" :messageId="messageId" :isProcessMessage="isProcessMessage" />
+        <FeedbackSection v-if="role === 'assistant'" :messageId="messageId" />
       </div>
       <div class="message-time">{{ time }}</div>
     </div>
@@ -22,7 +22,6 @@
 
 <script lang="ts" setup>
 import { defineProps, defineEmits } from "vue";
-import { ref, onMounted } from "vue";
 import FeedbackSection from "../FeedbackSection.vue";
 
 const props = defineProps<{
@@ -34,26 +33,21 @@ const props = defineProps<{
     payload?: string;
   }>;
   messageId: number;
-  isProcessMessage: boolean;
+  role: "user" | "assistant" | "system";
 }>();
 
-const emit = defineEmits(["buttonClick"]);
-
-const isContentComplete = ref(false);
+const emit = defineEmits<{
+  (e: "button-click", button: { action: string; payload?: string }): void;
+}>();
 
 const handleButtonClick = (button: { action: string; payload?: string }) => {
-  emit("buttonClick", button);
+  emit("button-click", button);
 };
-
-onMounted(() => {
-  // 模擬內容加載完成
-  setTimeout(() => {
-    isContentComplete.value = true;
-  }, 500);
-});
 </script>
 
 <style scoped>
+@import "../../assets/styles/common.css";
+
 .message {
   display: flex;
   align-items: flex-start;
@@ -107,16 +101,16 @@ onMounted(() => {
 .button-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .button-group button {
-  padding: 5px 10px;
+  padding: 6px 12px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
 }

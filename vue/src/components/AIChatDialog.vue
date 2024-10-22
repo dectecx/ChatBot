@@ -1,12 +1,20 @@
 <template>
   <div class="chat-container">
     <div class="header">
-      <img src="../assets/Logo-Test.png" alt="" class="logo" />
+      <img src="../assets/Logo-Test.png" alt="測試對話 Test Chat" class="logo" />
+      <!-- 修改切換側邊欄的按鈕 -->
+      <button @click="toggleSidebar" class="toggle-sidebar-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+        </svg>
+        <span>{{ showSidebar ? "隱藏側邊欄" : "顯示側邊欄" }}</span>
+      </button>
     </div>
     <div class="content">
-      <div class="sidebar">
+      <!-- 為側邊欄添加一個 class 來控制其顯示與隱藏 -->
+      <div :class="['sidebar', { 'sidebar-hidden': !showSidebar }]">
         <button @click="startNewChat" class="new-chat-btn">
-          新聊天
+          新對話
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24" class="editor-icon">
             <path
               d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
@@ -24,42 +32,81 @@
         </div>
       </div>
       <div class="main-chat">
-        <div class="chat-header">{{ currentChat ? currentChat.title : "新聊天" }}</div>
-        <div class="chat-messages" ref="chatMessages">
-          <div v-for="(message, index) in currentChat?.messages" :key="index" :class="['message', message.role]">
-            <div v-if="message.role === 'assistant'" class="assistant-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-              </svg>
-            </div>
-            <div class="message-wrapper">
-              <div class="message-content">
-                {{ message.content }}
-              </div>
-              <div class="message-time">{{ message.time }}</div>
-            </div>
+        <div class="chat-header">{{ currentChat ? currentChat.title : "新對話" }}</div>
+        <div class="chat-messages-container">
+          <div class="chat-messages" ref="chatMessages" @scroll="handleScroll">
+            <template v-for="(message, index) in currentChat?.messages" :key="index">
+              <TextMessageComponent
+                v-if="message.type === 'text'"
+                :role="message.role"
+                :content="message.content"
+                :time="message.time"
+                :isNewMessage="message.isNewMessage ?? false"
+              />
+              <ButtonMessageComponent
+                v-else-if="message.type === 'button'"
+                :content="message.content"
+                :time="message.time"
+                :buttons="message.buttons"
+                @button-click="handleButtonClick"
+              />
+            </template>
+            <LoadingMessage v-if="isLoading" />
+          </div>
+          <div v-if="showScrollButton" class="scroll-button" @click="scrollToBottom()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+            </svg>
           </div>
         </div>
+        <!-- 將 AI 回覆提示移到這裡 -->
+        <div v-if="isWaitingForResponse" class="ai-responding-hint">AI 正在回覆中... 按下 ESC 鍵可終止回覆</div>
         <div class="chat-input">
-          <textarea v-model="userInput" @keyup.enter.prevent="sendMessage" placeholder="請輸入訊息..."></textarea>
-          <button @click="sendMessage" class="send-button">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+          <textarea
+            v-model="userInput"
+            @keyup.enter.prevent="sendMessage"
+            @keyup.esc="cancelResponse"
+            @input="handleInput"
+            placeholder="請輸入訊息..."
+            ref="inputTextarea"
+          ></textarea>
+          <button @click="isWaitingForResponse ? cancelResponse() : sendMessage()" class="send-button" :class="{ 'cancel-button': isWaitingForResponse }">
+            <svg v-if="!isWaitingForResponse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
           </button>
         </div>
+      </div>
+    </div>
+    <!-- 新增自訂對話框 -->
+    <div v-if="showDialog" class="custom-dialog">
+      <div class="dialog-content">
+        <p>{{ dialogMessage }}</p>
+        <button @click="closeDialog">關閉</button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick, computed } from "vue";
+import { ref, onMounted, nextTick, computed, watch, onUnmounted } from "vue";
 import { useChatStore } from "../stores/chatStore";
+import TextMessageComponent from "./messages/TextMessage.vue";
+import ButtonMessageComponent from "./messages/ButtonMessage.vue";
+import LoadingMessage from "./messages/LoadingMessage.vue";
+import type { ChatHistory, ChatMessage, TextChatMessage, ButtonChatMessage } from "../stores/chatStore";
 
 const chatStore = useChatStore();
 const userInput = ref("");
 const chatMessages = ref<HTMLElement | null>(null);
+const inputTextarea = ref<HTMLTextAreaElement | null>(null);
+
+// 新增用於控制對話框的狀態
+const showDialog = ref(false);
+const dialogMessage = ref("");
 
 const currentChat = computed(() => chatStore.chatHistory.find((chat) => chat.id === chatStore.currentChatId));
 
@@ -76,35 +123,173 @@ const groupedChatHistory = computed(() => {
 });
 
 const startNewChat = () => {
+  if (isWaitingForResponse.value) {
+    cancelResponse();
+  }
   chatStore.addNewChat();
 };
 
-const selectChat = (id: number) => {
-  chatStore.selectChat(id);
+// 新增這個函數來重置所有消息的 isNewMessage 屬性
+const resetNewMessageFlags = (messages: ChatMessage[]) => {
+  messages.forEach((message) => {
+    if ("isNewMessage" in message) {
+      message.isNewMessage = false;
+    }
+  });
 };
 
-const sendMessage = () => {
-  if (userInput.value.trim() === "" || !chatStore.currentChatId) return;
+const selectChat = (id: number) => {
+  if (isWaitingForResponse.value) {
+    cancelResponse();
+  }
+  chatStore.selectChat(id);
+  // 重置所有消息的 isNewMessage 標誌
+  if (currentChat.value) {
+    resetNewMessageFlags(currentChat.value.messages);
+  }
+  nextTick(() => {
+    scrollToBottom();
+    handleScroll();
+  });
+};
 
-  chatStore.addMessage(chatStore.currentChatId, { role: "user", content: userInput.value });
+const handleButtonClick = (button: { action: string; payload?: string }) => {
+  if (button.action === "dialog") {
+    dialogMessage.value = button.payload || "這是一個對話框訊息";
+    showDialog.value = true;
+
+    if (chatStore.currentChatId) {
+      chatStore.addMessage(chatStore.currentChatId, {
+        role: "assistant",
+        type: "text",
+        content: "對話框已顯示。您可以繼續對話。",
+      });
+    }
+  } else if (button.action === "process") {
+    if (chatStore.currentChatId) {
+      chatStore.addMessage(chatStore.currentChatId, {
+        role: "assistant",
+        type: "text",
+        content: `開始 ${button.payload} 流程`,
+      });
+    }
+  }
+  scrollToBottom();
+};
+
+const handleInput = (event: Event) => {
+  userInput.value = (event.target as HTMLTextAreaElement).value;
+};
+
+const isLoading = ref(false);
+const isWaitingForResponse = ref(false);
+const responseTimeout = ref<number | null>(null);
+
+const canSendMessage = computed(() => userInput.value.trim() !== "");
+
+const sendMessage = () => {
+  if (!canSendMessage.value || isWaitingForResponse.value) return;
+
+  chatStore.addMessage(chatStore.currentChatId!, { role: "user", type: "text", content: userInput.value });
   userInput.value = "";
 
-  // 模擬AI回應
-  setTimeout(() => {
+  scrollToBottom();
+
+  isWaitingForResponse.value = true;
+  isLoading.value = true;
+
+  const randomDelay = Math.random() * 3000;
+
+  responseTimeout.value = window.setTimeout(() => {
     if (chatStore.currentChatId) {
-      chatStore.addMessage(chatStore.currentChatId, { role: "assistant", content: "這是一個模擬的AI回應。" });
+      const randomValue = Math.random();
+      const responseType = randomValue < 0.7 ? "text" : "button";
+
+      if (responseType === "text") {
+        const newMessage: Omit<TextChatMessage, "time"> = {
+          role: "assistant",
+          type: "text",
+          content: "這是一個模擬的 AI 文字回應。",
+          isNewMessage: true, // 設置為 true，表示這是新消息
+        };
+        chatStore.addMessage(chatStore.currentChatId, newMessage);
+      } else {
+        const buttonMessage: Omit<ButtonChatMessage, "time"> = {
+          role: "assistant",
+          type: "button",
+          content: "這是一個包含按鈕的回應。請選擇一個選項：",
+          buttons: [
+            { text: "顯示對話框", action: "dialog", payload: "這是一個對話框訊息" },
+            { text: "開始特定流程", action: "process", payload: "特定" },
+          ],
+        };
+        chatStore.addMessage(chatStore.currentChatId, buttonMessage);
+      }
+      isLoading.value = false;
+      isWaitingForResponse.value = false;
       scrollToBottom();
+
+      nextTick(() => {
+        if (inputTextarea.value) {
+          inputTextarea.value.focus();
+        }
+      });
     }
-  }, 1000);
+  }, randomDelay);
+};
+
+const cancelResponse = () => {
+  if (responseTimeout.value !== null) {
+    clearTimeout(responseTimeout.value);
+    responseTimeout.value = null;
+  }
+
+  if (isWaitingForResponse.value) {
+    if (chatStore.currentChatId) {
+      chatStore.addMessage(chatStore.currentChatId, {
+        role: "assistant",
+        type: "text",
+        content: "回覆已被使用者中斷。",
+      });
+    }
+    isWaitingForResponse.value = false;
+    isLoading.value = false;
+  }
+
+  // 在取消回應後，將焦點設置回輸入框
+  nextTick(() => {
+    if (inputTextarea.value) {
+      inputTextarea.value.focus();
+    }
+  });
+};
+
+const showScrollButton = ref(false);
+
+const handleScroll = () => {
+  if (chatMessages.value) {
+    const { scrollTop, scrollHeight, clientHeight } = chatMessages.value;
+    showScrollButton.value = scrollTop < scrollHeight - clientHeight - 100; // 調整閾值
+  }
 };
 
 const scrollToBottom = () => {
   nextTick(() => {
     if (chatMessages.value) {
-      chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+      const container = chatMessages.value;
+      container.scrollTop = container.scrollHeight;
     }
   });
 };
+
+// 監聽聊天訊息的變化
+watch(
+  () => currentChat.value?.messages,
+  () => {
+    handleScroll();
+  },
+  { deep: true }
+);
 
 const formatHistoryDate = (chatId: number) => {
   const chat = chatStore.chatHistory.find((c) => c.id === chatId);
@@ -122,23 +307,57 @@ const formatHistoryTime = (chatId: number) => {
   return "";
 };
 
+const closeDialog = () => {
+  showDialog.value = false;
+  // 在對話框關閉後，將焦點設置回輸入框
+  nextTick(() => {
+    if (inputTextarea.value) {
+      inputTextarea.value.focus();
+    }
+  });
+};
+
+// 添加一個新的 ref 來控制側邊欄的顯示與隱藏
+const showSidebar = ref(true);
+
+// 添加一個新的函數來切換側邊欄的顯示與隱藏
+const toggleSidebar = () => {
+  showSidebar.value = !showSidebar.value;
+};
+
 onMounted(() => {
   if (chatStore.chatHistory.length === 0) {
     startNewChat();
   }
-  scrollToBottom();
+  nextTick(() => {
+    scrollToBottom();
+    handleScroll();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isWaitingForResponse.value) {
+      cancelResponse();
+    }
+  });
+});
+
+// 新增：監聽窗口大小變化
+window.addEventListener("resize", handleScroll);
+
+// 新增：組件卸載時移除事件監聽
+onUnmounted(() => {
+  window.removeEventListener("resize", handleScroll);
 });
 </script>
 
 <style scoped>
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-}
+@import "../assets/styles/common.css";
+@import "../assets/styles/chat.css";
 
+/* 修改 header 樣式 */
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
   background-color: #45b29d;
   border-bottom: 1px solid #ccc;
@@ -146,23 +365,36 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
+/* 修改 logo 樣式 */
 .logo {
   height: 40px;
   width: auto;
+  display: block; /* 確保 logo 垂直居中 */
 }
 
-.content {
+/* 修改切換側邊欄按鈕樣式 */
+.toggle-sidebar-btn {
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  align-items: center;
+  background-color: #3c4c5e;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
-.sidebar {
-  width: 250px;
-  background-color: #f0f0f0;
-  border-right: 1px solid #ccc;
-  display: flex;
-  flex-direction: column;
+.toggle-sidebar-btn:hover {
+  background-color: #2b3c50;
+}
+
+.toggle-sidebar-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: #ffffff;
+  margin-right: 8px;
 }
 
 .new-chat-btn {
@@ -221,99 +453,11 @@ onMounted(() => {
   background-color: #e6f3ff;
 }
 
-.main-chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
 .chat-header {
   padding: 20px;
   background-color: #ffffff;
   border-bottom: 1px solid #ccc;
   font-weight: bold;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-}
-
-.message {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  max-width: 80%;
-}
-
-.user {
-  margin-left: auto;
-  flex-direction: row-reverse;
-}
-
-.assistant {
-  margin-right: auto;
-}
-
-.message-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.message-content {
-  padding: 10px 15px;
-  border-radius: 18px;
-  position: relative;
-}
-
-.user .message-content {
-  background-color: #3c4d5e;
-  color: white;
-  border-bottom-right-radius: 0;
-}
-
-.assistant .message-content {
-  background-color: white;
-  color: black;
-  border-bottom-left-radius: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.message-time {
-  font-size: 12px;
-  color: #888;
-  margin-top: 4px;
-  align-self: flex-start;
-}
-
-.user .message-time {
-  align-self: flex-end;
-}
-
-.assistant-icon {
-  margin-right: 10px;
-  width: 30px;
-  height: 30px;
-  background-color: #e6e6e6;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.assistant-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #666;
-}
-
-.chat-input {
-  display: flex;
-  padding: 20px;
-  background-color: #ffffff;
-  border-top: 1px solid #ccc;
 }
 
 textarea {
@@ -332,9 +476,217 @@ textarea {
   border: none;
   cursor: pointer;
   color: #007bff;
+  transition: color 0.3s;
 }
 
 .send-button:hover {
   color: #0056b3;
 }
+
+.send-button.cancel-button {
+  color: #dc3545;
+}
+
+.send-button.cancel-button:hover {
+  color: #bd2130;
+}
+
+.custom-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dialog-content button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.dialog-content button:hover {
+  background-color: #0056b3;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-responding-hint {
+  text-align: center;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  margin: 10px 0;
+  font-style: italic;
+  color: #666;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.chat-messages-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.chat-messages {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.scroll-button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  z-index: 1000;
+}
+
+.scroll-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.scroll-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.toggle-sidebar-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.toggle-sidebar-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #ffffff;
+}
+
+.sidebar {
+  width: 250px;
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.sidebar-hidden {
+  width: 0;
+}
+
+/* 調整主聊天區域的樣式，使其在側邊欄隱藏時佔據全部寬度 */
+.main-chat {
+  flex: 1;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar-hidden + .main-chat {
+  margin-left: 0;
+}
+
+/* 新增 RWD 樣式 */
+@media (max-width: 768px) {
+  .chat-container {
+    flex-direction: column;
+  }
+
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .logo {
+    height: 30px;
+  }
+
+  .content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .sidebar-hidden {
+    max-height: 0;
+  }
+
+  .main-chat {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .chat-messages-container {
+    height: calc(100vh - 200px);
+  }
+
+  .chat-input {
+    padding: 10px;
+  }
+
+  textarea {
+    height: 60px;
+  }
+
+  .send-button {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-item {
+    padding: 5px 10px;
+  }
+
+  .chat-header {
+    padding: 10px;
+  }
+
+  .chat-messages {
+    padding: 10px;
+  }
+
+  .button-group button {
+    padding: 5px;
+    font-size: 12px;
+  }
+}
+
+/* 保留原有的樣式 */
 </style>

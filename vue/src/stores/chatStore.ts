@@ -1,17 +1,34 @@
 import { defineStore } from "pinia";
 
-interface ChatHistory {
+interface BaseMessage {
+  role: "user" | "assistant";
+  time: string;
+}
+
+export interface TextChatMessage extends BaseMessage {
+  type: "text";
+  content: string;
+  isNewMessage?: boolean; // 修改這裡，使 isNewMessage 成為可選屬性
+}
+
+export interface ButtonChatMessage extends BaseMessage {
+  type: "button";
+  content: string;
+  buttons: Array<{
+    text: string;
+    action: "dialog" | "process";
+    payload?: string;
+  }>;
+}
+
+export type ChatMessage = TextChatMessage | ButtonChatMessage;
+
+export interface ChatHistory {
   id: number;
   date: string;
   title: string;
-  messages: Message[];
+  messages: ChatMessage[];
   lastMessageTime: string;
-}
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  time: string;
 }
 
 export const useChatStore = defineStore("chat", {
@@ -35,15 +52,20 @@ export const useChatStore = defineStore("chat", {
     selectChat(id: number) {
       this.currentChatId = id;
     },
-    addMessage(chatId: number, message: Omit<Message, "time">) {
+    addMessage(chatId: number, message: Omit<TextChatMessage, "time"> | Omit<ButtonChatMessage, "time">) {
       const chat = this.chatHistory.find((c) => c.id === chatId);
       if (chat) {
         const now = new Date();
-        const newMessage = { ...message, time: this.formatTime(now) };
+        const newMessage: ChatMessage = {
+          ...message,
+          time: this.formatTime(now),
+          isNewMessage: message.type === "text" ? message.isNewMessage : undefined,
+        } as ChatMessage;
+
         chat.messages.push(newMessage);
         chat.lastMessageTime = newMessage.time;
         if (chat.messages.length === 1) {
-          chat.title = message.content.slice(0, 20) + "...";
+          chat.title = message.type === "text" ? message.content.slice(0, 20) + "..." : "新對話";
         }
       }
     },

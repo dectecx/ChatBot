@@ -9,7 +9,7 @@
       <div class="message-content">
         <span v-if="role === 'user' || !isNewMessage">{{ content }}</span>
         <span v-else>{{ displayedContent }}</span>
-        <FeedbackSection v-if="role === 'assistant'" :isVisible="isTypingComplete" />
+        <FeedbackSection v-if="role === 'assistant'" :isVisible="isTypingComplete" :messageId="messageId" :isProcessMessage="isProcessMessage" />
       </div>
       <div class="message-time">{{ time }}</div>
     </div>
@@ -25,6 +25,8 @@ const props = defineProps<{
   content: string;
   time: string;
   isNewMessage: boolean;
+  messageId: number;
+  isProcessMessage: boolean;
 }>();
 
 const displayedContent = ref("");

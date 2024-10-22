@@ -15,10 +15,6 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-// No props or logic needed for this component
-</script>
-
 <style scoped>
 .message {
   display: flex;

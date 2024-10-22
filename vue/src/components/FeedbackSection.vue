@@ -1,31 +1,33 @@
 <template>
-  <div v-if="isVisible" class="feedback-section">
+  <div v-if="isVisible && !isProcessMessage" class="feedback-section">
     <template v-if="!feedbackGiven">
-      <button @click="giveFeedback(true)">有幫助</button>
-      <button @click="giveFeedback(false)">沒幫助</button>
+      <button @click="giveFeedback(true)" :disabled="feedbackGiven">有幫助</button>
+      <button @click="giveFeedback(false)" :disabled="feedbackGiven">沒幫助</button>
     </template>
-    <div v-else class="feedback-response">{{ feedbackResponse }}</div>
+    <div v-else class="feedback-result">
+      <button :class="{ selected: feedback === true }" disabled>有幫助</button>
+      <button v-if="feedback === false" :class="{ selected: feedback === false }" disabled>沒幫助</button>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { useChatStore } from "../stores/chatStore";
 
 const props = defineProps<{
   isVisible: boolean;
+  messageId: number;
+  isProcessMessage: boolean;
 }>();
 
-const feedbackGiven = ref(false);
-const feedbackResponse = ref("");
+const chatStore = useChatStore();
+
+const feedbackGiven = computed(() => chatStore.getFeedbackStatus(props.messageId));
+const feedback = computed(() => chatStore.getFeedback(props.messageId));
 
 const giveFeedback = (isHelpful: boolean) => {
-  feedbackGiven.value = true;
-  if (isHelpful) {
-    feedbackResponse.value = "非常感謝您的支持！我會持續努力提供更好的服務。";
-  } else {
-    feedbackResponse.value = "感謝您的回饋，請提供建議";
-  }
-  // 這裡可以添加發送回饋到後端的邏輯
+  chatStore.setFeedback(props.messageId, isHelpful);
 };
 </script>
 
@@ -46,8 +48,17 @@ const giveFeedback = (isHelpful: boolean) => {
   cursor: pointer;
 }
 
-.feedback-response {
-  font-style: italic;
-  color: #666;
+.feedback-section button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.feedback-section button.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.feedback-result {
+  display: flex;
 }
 </style>

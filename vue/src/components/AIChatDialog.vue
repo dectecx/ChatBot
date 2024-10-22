@@ -2,7 +2,6 @@
   <div class="chat-container">
     <div class="header">
       <img src="../assets/Logo-Test.png" alt="測試對話 Test Chat" class="logo" />
-      <!-- 修改切換側邊欄的按鈕 -->
       <button @click="toggleSidebar" class="toggle-sidebar-btn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
           <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
@@ -11,7 +10,6 @@
       </button>
     </div>
     <div class="content">
-      <!-- 為側邊欄添加一個 class 來控制其顯示與隱藏 -->
       <div :class="['sidebar', { 'sidebar-hidden': !showSidebar }]">
         <button @click="startNewChat" class="new-chat-btn">
           新對話
@@ -42,12 +40,16 @@
                 :content="message.content"
                 :time="message.time"
                 :isNewMessage="message.isNewMessage ?? false"
+                :messageId="message.id"
+                :isProcessMessage="message.isProcessMessage"
               />
               <ButtonMessageComponent
                 v-else-if="message.type === 'button'"
                 :content="message.content"
                 :time="message.time"
                 :buttons="message.buttons"
+                :messageId="message.id"
+                :isProcessMessage="message.isProcessMessage"
                 @button-click="handleButtonClick"
               />
             </template>
@@ -59,7 +61,6 @@
             </svg>
           </div>
         </div>
-        <!-- 將 AI 回覆提示移到這裡 -->
         <div v-if="isWaitingForResponse" class="ai-responding-hint">AI 正在回覆中... 按下 ESC 鍵可終止回覆</div>
         <div class="chat-input">
           <textarea
@@ -81,7 +82,7 @@
         </div>
       </div>
     </div>
-    <!-- 新增自訂對話框 -->
+    <!-- 自訂對話框 -->
     <div v-if="showDialog" class="custom-dialog">
       <div class="dialog-content">
         <p>{{ dialogMessage }}</p>
@@ -104,7 +105,6 @@ const userInput = ref("");
 const chatMessages = ref<HTMLElement | null>(null);
 const inputTextarea = ref<HTMLTextAreaElement | null>(null);
 
-// 新增用於控制對話框的狀態
 const showDialog = ref(false);
 const dialogMessage = ref("");
 
@@ -129,7 +129,7 @@ const startNewChat = () => {
   chatStore.addNewChat();
 };
 
-// 新增這個函數來重置所有消息的 isNewMessage 屬性
+// 重置所有消息的 isNewMessage 屬性
 const resetNewMessageFlags = (messages: ChatMessage[]) => {
   messages.forEach((message) => {
     if ("isNewMessage" in message) {
@@ -143,10 +143,11 @@ const selectChat = (id: number) => {
     cancelResponse();
   }
   chatStore.selectChat(id);
-  // 重置所有消息的 isNewMessage 標誌
+
   if (currentChat.value) {
     resetNewMessageFlags(currentChat.value.messages);
   }
+
   nextTick(() => {
     scrollToBottom();
     handleScroll();
@@ -163,6 +164,7 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
         role: "assistant",
         type: "text",
         content: "對話框已顯示。您可以繼續對話。",
+        isProcessMessage: false,
       });
     }
   } else if (button.action === "process") {
@@ -171,6 +173,7 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
         role: "assistant",
         type: "text",
         content: `開始 ${button.payload} 流程`,
+        isProcessMessage: true,
       });
     }
   }
@@ -190,7 +193,12 @@ const canSendMessage = computed(() => userInput.value.trim() !== "");
 const sendMessage = () => {
   if (!canSendMessage.value || isWaitingForResponse.value) return;
 
-  chatStore.addMessage(chatStore.currentChatId!, { role: "user", type: "text", content: userInput.value });
+  chatStore.addMessage(chatStore.currentChatId!, {
+    role: "user",
+    type: "text",
+    content: userInput.value,
+    isProcessMessage: false,
+  });
   userInput.value = "";
 
   scrollToBottom();
@@ -206,15 +214,16 @@ const sendMessage = () => {
       const responseType = randomValue < 0.7 ? "text" : "button";
 
       if (responseType === "text") {
-        const newMessage: Omit<TextChatMessage, "time"> = {
+        const newMessage: Omit<TextChatMessage, "time" | "id"> = {
           role: "assistant",
           type: "text",
           content: "這是一個模擬的 AI 文字回應。",
-          isNewMessage: true, // 設置為 true，表示這是新消息
+          isNewMessage: true,
+          isProcessMessage: false,
         };
         chatStore.addMessage(chatStore.currentChatId, newMessage);
       } else {
-        const buttonMessage: Omit<ButtonChatMessage, "time"> = {
+        const buttonMessage: Omit<ButtonChatMessage, "time" | "id"> = {
           role: "assistant",
           type: "button",
           content: "這是一個包含按鈕的回應。請選擇一個選項：",
@@ -222,6 +231,7 @@ const sendMessage = () => {
             { text: "顯示對話框", action: "dialog", payload: "這是一個對話框訊息" },
             { text: "開始特定流程", action: "process", payload: "特定" },
           ],
+          isProcessMessage: false,
         };
         chatStore.addMessage(chatStore.currentChatId, buttonMessage);
       }
@@ -250,6 +260,7 @@ const cancelResponse = () => {
         role: "assistant",
         type: "text",
         content: "回覆已被使用者中斷。",
+        isProcessMessage: false,
       });
     }
     isWaitingForResponse.value = false;
@@ -269,7 +280,7 @@ const showScrollButton = ref(false);
 const handleScroll = () => {
   if (chatMessages.value) {
     const { scrollTop, scrollHeight, clientHeight } = chatMessages.value;
-    showScrollButton.value = scrollTop < scrollHeight - clientHeight - 100; // 調整閾值
+    showScrollButton.value = scrollTop < scrollHeight - clientHeight - 100;
   }
 };
 
@@ -317,10 +328,7 @@ const closeDialog = () => {
   });
 };
 
-// 添加一個新的 ref 來控制側邊欄的顯示與隱藏
 const showSidebar = ref(true);
-
-// 添加一個新的函數來切換側邊欄的顯示與隱藏
 const toggleSidebar = () => {
   showSidebar.value = !showSidebar.value;
 };
@@ -340,10 +348,10 @@ onMounted(() => {
   });
 });
 
-// 新增：監聽窗口大小變化
+// 監聽窗口大小變化
 window.addEventListener("resize", handleScroll);
 
-// 新增：組件卸載時移除事件監聽
+// 組件卸載時移除事件監聽
 onUnmounted(() => {
   window.removeEventListener("resize", handleScroll);
 });
@@ -353,7 +361,6 @@ onUnmounted(() => {
 @import "../assets/styles/common.css";
 @import "../assets/styles/chat.css";
 
-/* 修改 header 樣式 */
 .header {
   display: flex;
   justify-content: space-between;
@@ -365,14 +372,12 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
-/* 修改 logo 樣式 */
 .logo {
   height: 40px;
   width: auto;
   display: block; /* 確保 logo 垂直居中 */
 }
 
-/* 修改切換側邊欄按鈕樣式 */
 .toggle-sidebar-btn {
   display: flex;
   align-items: center;
@@ -606,7 +611,6 @@ textarea {
   width: 0;
 }
 
-/* 調整主聊天區域的樣式，使其在側邊欄隱藏時佔據全部寬度 */
 .main-chat {
   flex: 1;
   transition: margin-left 0.3s ease-in-out;
@@ -616,7 +620,6 @@ textarea {
   margin-left: 0;
 }
 
-/* 新增 RWD 樣式 */
 @media (max-width: 768px) {
   .chat-container {
     flex-direction: column;
@@ -687,6 +690,4 @@ textarea {
     font-size: 12px;
   }
 }
-
-/* 保留原有的樣式 */
 </style>

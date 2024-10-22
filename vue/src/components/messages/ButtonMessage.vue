@@ -13,7 +13,7 @@
             {{ btn.text }}
           </button>
         </div>
-        <FeedbackSection :isVisible="isContentComplete" />
+        <FeedbackSection :isVisible="isContentComplete" :messageId="messageId" :isProcessMessage="isProcessMessage" />
       </div>
       <div class="message-time">{{ time }}</div>
     </div>
@@ -23,6 +23,7 @@
 <script lang="ts" setup>
 import { defineProps, defineEmits } from "vue";
 import { ref, onMounted } from "vue";
+import FeedbackSection from "../FeedbackSection.vue";
 
 const props = defineProps<{
   content: string;
@@ -32,25 +33,16 @@ const props = defineProps<{
     action: "dialog" | "process";
     payload?: string;
   }>;
+  messageId: number;
+  isProcessMessage: boolean;
 }>();
 
 const emit = defineEmits(["buttonClick"]);
 
-const feedbackGiven = ref(false);
-const feedbackResponse = ref("");
 const isContentComplete = ref(false);
 
 const handleButtonClick = (button: { action: string; payload?: string }) => {
   emit("buttonClick", button);
-};
-
-const giveFeedback = (isHelpful: boolean) => {
-  feedbackGiven.value = true;
-  if (isHelpful) {
-    feedbackResponse.value = "非常感謝您的支持！我會持續努力提供更好的服務。";
-  } else {
-    feedbackResponse.value = "感謝您的回饋，請提供建議";
-  }
 };
 
 onMounted(() => {

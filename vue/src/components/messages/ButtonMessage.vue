@@ -13,13 +13,7 @@
             {{ btn.text }}
           </button>
         </div>
-        <div v-if="isContentComplete" class="feedback-section">
-          <template v-if="!feedbackGiven">
-            <button @click="giveFeedback(true)">有幫助</button>
-            <button @click="giveFeedback(false)">沒幫助</button>
-          </template>
-          <div v-else class="feedback-response">{{ feedbackResponse }}</div>
-        </div>
+        <FeedbackSection :isVisible="isContentComplete" />
       </div>
       <div class="message-time">{{ time }}</div>
     </div>
@@ -137,26 +131,5 @@ onMounted(() => {
 
 .button-group button:hover {
   background-color: #0056b3;
-}
-
-.feedback-section {
-  margin-top: 10px;
-  font-size: 12px;
-  border-top: 1px solid #e0e0e0;
-  padding-top: 10px;
-}
-
-.feedback-section button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.feedback-response {
-  font-style: italic;
-  color: #666;
 }
 </style>

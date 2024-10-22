@@ -9,13 +9,7 @@
       <div class="message-content">
         <span v-if="role === 'user' || !isNewMessage">{{ content }}</span>
         <span v-else>{{ displayedContent }}</span>
-        <div v-if="role === 'assistant' && isTypingComplete" class="feedback-section">
-          <template v-if="!feedbackGiven">
-            <button @click="giveFeedback(true)">有幫助</button>
-            <button @click="giveFeedback(false)">沒幫助</button>
-          </template>
-          <div v-else class="feedback-response">{{ feedbackResponse }}</div>
-        </div>
+        <FeedbackSection v-if="role === 'assistant'" :isVisible="isTypingComplete" />
       </div>
       <div class="message-time">{{ time }}</div>
     </div>
@@ -24,6 +18,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch, onUnmounted } from "vue";
+import FeedbackSection from "../FeedbackSection.vue";
 
 const props = defineProps<{
   role: "user" | "assistant";
@@ -116,26 +111,5 @@ const giveFeedback = (isHelpful: boolean) => {
 
 .user .message-time {
   align-self: flex-end;
-}
-
-.feedback-section {
-  margin-top: 10px;
-  font-size: 12px;
-  border-top: 1px solid #e0e0e0;
-  padding-top: 10px;
-}
-
-.feedback-section button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.feedback-response {
-  font-style: italic;
-  color: #666;
 }
 </style>

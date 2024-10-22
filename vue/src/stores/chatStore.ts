@@ -41,6 +41,9 @@ export const useChatStore = defineStore("chat", {
     chatHistory: [] as ChatHistory[],
     currentChatId: null as number | null,
     feedback: {} as FeedbackState,
+    isLoading: false,
+    isWaitingForResponse: false,
+    showSidebar: true,
   }),
   actions: {
     addNewChat() {
@@ -79,6 +82,15 @@ export const useChatStore = defineStore("chat", {
         }
       }
     },
+    setIsLoading(value: boolean) {
+      this.isLoading = value;
+    },
+    setIsWaitingForResponse(value: boolean) {
+      this.isWaitingForResponse = value;
+    },
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
     formatTime(date: Date): string {
       return date.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
     },
@@ -93,6 +105,20 @@ export const useChatStore = defineStore("chat", {
     },
     getFeedback(messageId: number): boolean | null {
       return this.feedback[messageId] ?? null;
+    },
+  },
+  getters: {
+    currentChat: (state): ChatHistory | undefined => state.chatHistory.find((chat) => chat.id === state.currentChatId),
+    groupedChatHistory: (state) => {
+      const groups: { [key: string]: ChatHistory[] } = {};
+      state.chatHistory.forEach((chat) => {
+        const date = new Date(chat.id).toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric" });
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(chat);
+      });
+      return groups;
     },
   },
 });

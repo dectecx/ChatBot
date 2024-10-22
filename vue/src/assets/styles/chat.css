@@ -1,18 +1,3 @@
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-}
-
-.header {
-  width: 100%;
-  background-color: #45b29d;
-  border-bottom: 1px solid #ccc;
-  padding: 10px 20px;
-  box-sizing: border-box;
-}
-
 .content {
   display: flex;
   flex: 1;
@@ -28,29 +13,8 @@
   overflow-y: auto;
 }
 
-.main-chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-}
-
-.chat-input {
-  display: flex;
-  padding: 20px;
-  background-color: #ffffff;
-  border-top: 1px solid #ccc;
-}
-
 /* 確保內容不會溢出容器 */
-.chat-item, .message, .message-content {
+.message, .message-content {
   word-break: break-word;
   overflow-wrap: break-word;
 }

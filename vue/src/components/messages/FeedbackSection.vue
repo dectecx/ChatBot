@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { useChatStore } from "../stores/chatStore";
+import { useChatStore } from "@/stores/chatStore";
 
 const props = defineProps<{
   messageId: number;
@@ -34,14 +34,6 @@ const props = defineProps<{
 const chatStore = useChatStore();
 const feedbackGiven = ref(false);
 const feedbackResponse = ref("");
-
-onMounted(() => {
-  const existingFeedback = chatStore.getFeedback(props.messageId);
-  if (existingFeedback !== null) {
-    feedbackGiven.value = true;
-    feedbackResponse.value = existingFeedback ? "非常感謝您的支持！我們會持續努力提供更好的服務。" : "感謝您的回饋。我們會努力改進我們的回答品質。";
-  }
-});
 
 const giveFeedback = (isHelpful: boolean) => {
   chatStore.setFeedback(props.messageId, isHelpful);
@@ -52,6 +44,14 @@ const giveFeedback = (isHelpful: boolean) => {
     feedbackResponse.value = "感謝您的回饋。我們會努力改進我們的回答品質。";
   }
 };
+
+onMounted(() => {
+  const existingFeedback = chatStore.getFeedback(props.messageId);
+  if (existingFeedback !== null) {
+    feedbackGiven.value = true;
+    feedbackResponse.value = existingFeedback ? "非常感謝您的支持！我們會持續努力提供更好的服務。" : "感謝您的回饋。我們會努力改進我們的回答品質。";
+  }
+});
 </script>
 
 <style scoped>

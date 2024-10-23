@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ChatMessage, useChatStore } from "../stores/chatStore";
+import { ChatMessage, useChatStore } from "@/stores/chatStore";
 
 const chatStore = useChatStore();
 

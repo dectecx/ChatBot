@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { defineProps, defineEmits } from "vue";
-import FeedbackSection from "../FeedbackSection.vue";
+import FeedbackSection from "@/components/messages/FeedbackSection.vue";
 
 const props = defineProps<{
   content: string;
@@ -46,7 +46,7 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
 </script>
 
 <style scoped>
-@import "../../assets/styles/common.css";
+@import "@/assets/styles/common.css";
 
 .message {
   display: flex;

@@ -58,10 +58,10 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, nextTick, watch, onUnmounted } from "vue";
-import { ButtonChatMessage, TextChatMessage, useChatStore } from "../stores/chatStore";
-import TextMessageComponent from "./messages/TextMessage.vue";
-import ButtonMessageComponent from "./messages/ButtonMessage.vue";
-import LoadingMessage from "./messages/LoadingMessage.vue";
+import { ButtonChatMessage, TextChatMessage, useChatStore } from "@/stores/chatStore";
+import TextMessageComponent from "@/components/messages/TextMessage.vue";
+import ButtonMessageComponent from "@/components/messages/ButtonMessage.vue";
+import LoadingMessage from "@/components/messages/LoadingMessage.vue";
 
 const chatStore = useChatStore();
 const userInput = ref("");

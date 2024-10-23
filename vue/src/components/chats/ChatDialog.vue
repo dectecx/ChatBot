@@ -1,7 +1,7 @@
 <template>
   <div class="chat-container">
     <div class="header">
-      <img src="../assets/Logo-Test.png" alt="測試對話 Test Chat" class="logo" />
+      <img src="@/assets/Logo-Test.png" alt="測試對話 Test Chat" class="logo" />
       <button @click="chatStore.toggleSidebar" class="toggle-sidebar-btn">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
           <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
@@ -18,22 +18,23 @@
 
 <script lang="ts" setup>
 import { onMounted } from "vue";
-import { useChatStore } from "../stores/chatStore";
-import ChatHistoryComponent from "./ChatHistory.vue";
-import ChatWindowComponent from "./ChatWindow.vue";
+import { useChatStore } from "@/stores/chatStore";
+import ChatHistoryComponent from "@/components/chats/ChatHistory.vue";
+import ChatWindowComponent from "@/components/chats/ChatWindow.vue";
 
 const chatStore = useChatStore();
 
 onMounted(() => {
   if (chatStore.chatHistory.length === 0) {
+    // TODO: 待補預設啟動一個聊天室
     // startNewChat();
   }
 });
 </script>
 
 <style scoped>
-@import "../assets/styles/common.css";
-@import "../assets/styles/chat.css";
+@import "@/assets/styles/common.css";
+@import "@/assets/styles/chat.css";
 
 .chat-container {
   display: flex;

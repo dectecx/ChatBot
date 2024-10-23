@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch, onUnmounted } from "vue";
-import FeedbackSection from "../FeedbackSection.vue";
+import FeedbackSection from "@/components/messages/FeedbackSection.vue";
 
 const props = defineProps<{
   role: "user" | "assistant" | "system";
@@ -83,7 +83,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-@import "../../assets/styles/common.css";
+@import "@/assets/styles/common.css";
 
 .user .message-content {
   background-color: #3c4d5e;

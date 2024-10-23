@@ -1,11 +1,11 @@
 <template>
   <div id="app">
-    <AIChatDialog />
+    <ChatDialog />
   </div>
 </template>
 
 <script lang="ts" setup>
-import AIChatDialog from "./components/AIChatDialog.vue";
+import ChatDialog from "./components/chats/ChatDialog.vue";
 </script>
 
 <style>

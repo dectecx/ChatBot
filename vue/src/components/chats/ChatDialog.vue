@@ -102,18 +102,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .chat-container {
-    flex-direction: column;
-  }
-
-  .header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-  }
-
-  .logo {
-    height: 30px;
+    height: 100%;
   }
 
   .content {
@@ -122,12 +111,19 @@ onMounted(() => {
 
   .sidebar {
     width: 100%;
-    max-height: 200px;
+    max-height: 40vh;
     overflow-y: auto;
+    transition: max-height 0.3s ease-in-out;
   }
 
   .sidebar-hidden {
     max-height: 0;
+    overflow: hidden;
+  }
+
+  .main-chat {
+    flex: 1;
+    overflow-y: auto;
   }
 }
 </style>

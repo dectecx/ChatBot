@@ -212,8 +212,17 @@ watch(
   { deep: true }
 );
 
+// 監聽 currentChat
+watch(
+  () => chatStore.currentChatId,
+  () => {
+    console.log("Current chat changed:", chatStore.currentChatId);
+    scrollToBottom();
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
-  // TODO: 切換聊天室時，需要 scrollToBottom
   nextTick(() => {
     scrollToBottom();
     handleScroll();

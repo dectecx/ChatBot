@@ -112,44 +112,33 @@ onUnmounted(() => {
 
 .message-time {
   font-size: 12px;
-  color: #888;
+  color: #999999;
   margin-top: 4px;
   align-self: flex-start;
 }
 
 .assistant-icon {
-  margin-right: 10px;
-  width: 30px;
-  height: 30px;
-  background-color: #e6e6e6;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background-color: #e6eded;
 }
 
 .assistant-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #666;
+  color: #45b29d;
 }
 
 .user .message-content {
-  background-color: #3c4d5e;
-  color: white;
-  border-bottom-right-radius: 0;
+  background-color: #45b29d;
+  color: #ffffff;
 }
 
 .assistant .message-content,
 .system .message-content {
-  background-color: white;
-  color: black;
-  border-bottom-left-radius: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: #e6eded;
+  color: #333333;
+  box-shadow: 0 1px 2px rgba(69, 178, 157, 0.1);
 }
 
 .system .message-content {
-  background-color: #f0f0f0;
+  background-color: #f0f4f4;
   font-style: italic;
 }
 

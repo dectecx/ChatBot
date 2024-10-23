@@ -31,6 +31,7 @@ const chatStore = useChatStore();
   height: 100vh;
   width: 100%;
   font-family: Arial, sans-serif;
+  background-color: #f0f4f4;
 }
 
 .header {
@@ -38,7 +39,8 @@ const chatStore = useChatStore();
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: #45b29d;
+  background: linear-gradient(to right, #45b29d, #5bc0a8);
+  color: #ffffff;
   border-bottom: 1px solid #ccc;
   padding: 10px 20px;
   box-sizing: border-box;
@@ -53,8 +55,8 @@ const chatStore = useChatStore();
 .toggle-sidebar-btn {
   display: flex;
   align-items: center;
-  background: none;
-  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -64,7 +66,7 @@ const chatStore = useChatStore();
 }
 
 .toggle-sidebar-btn:hover {
-  background-color: #2b3c50;
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .toggle-sidebar-btn svg {
@@ -80,8 +82,8 @@ const chatStore = useChatStore();
 
 .sidebar {
   width: 250px;
-  background-color: #f0f0f0;
-  border-right: 1px solid #ccc;
+  background-color: #e6eded;
+  border-right: 1px solid #d1dada;
   display: flex;
   flex-direction: column;
   overflow-y: auto;

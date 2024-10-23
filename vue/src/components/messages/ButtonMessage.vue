@@ -66,15 +66,15 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
   padding: 10px 15px;
   border-radius: 18px;
   position: relative;
-  background-color: white;
-  color: black;
+  background-color: #e6eded;
+  color: #333333;
   border-bottom-left-radius: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(69, 178, 157, 0.1);
 }
 
 .message-time {
   font-size: 12px;
-  color: #888;
+  color: #999999;
   margin-top: 4px;
   align-self: flex-start;
 }
@@ -83,7 +83,7 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
   margin-right: 10px;
   width: 30px;
   height: 30px;
-  background-color: #e6e6e6;
+  background-color: #e6eded;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -93,7 +93,7 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
 .assistant-icon svg {
   width: 20px;
   height: 20px;
-  color: #666;
+  color: #45b29d;
 }
 
 .button-group {
@@ -107,8 +107,8 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
   flex: 1;
   min-width: 100px;
   padding: 6px 12px;
-  background-color: #007bff;
-  color: white;
+  background-color: #45b29d;
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -116,7 +116,7 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
 }
 
 .button-group button:hover {
-  background-color: #0056b3;
+  background-color: #3a9683;
 }
 
 /* 確保內容不會溢出容器 */

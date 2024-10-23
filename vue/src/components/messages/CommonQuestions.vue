@@ -26,12 +26,12 @@ defineEmits<{
   left: 0;
   right: 0;
   padding: 12px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(230, 237, 237, 0.95);
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   margin: 0;
   z-index: 10;
-  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -5px 20px rgba(69, 178, 157, 0.1);
 }
 
 .question-container {
@@ -44,23 +44,22 @@ defineEmits<{
 .common-questions button {
   flex-grow: 0;
   padding: 8px 15px;
-  background-color: #f0f4f8;
+  background-color: #ffffff;
   border: none;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
-  color: #4a5568;
+  color: #45b29d;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(69, 178, 157, 0.1);
   white-space: nowrap;
 }
 
 .common-questions button:hover {
-  background-color: #e2e8f0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #f0f4f4;
+  box-shadow: 0 4px 8px rgba(69, 178, 157, 0.15);
 }
 
 .common-questions button:active {

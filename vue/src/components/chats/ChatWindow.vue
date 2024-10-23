@@ -264,13 +264,15 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: #f0f4f4;
 }
 
 .chat-header {
   padding: 20px;
-  background-color: #ffffff;
+  background-color: #e6eded;
   border-bottom: 1px solid #ccc;
   font-weight: bold;
+  color: #45b29d;
 }
 
 .chat-messages-container {
@@ -283,7 +285,7 @@ onUnmounted(() => {
   height: 100%;
   overflow-y: auto;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
 }
 
 .scroll-button {
@@ -291,7 +293,7 @@ onUnmounted(() => {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(69, 178, 157, 0.8);
   color: white;
   border-radius: 50%;
   width: 40px;
@@ -305,7 +307,7 @@ onUnmounted(() => {
 }
 
 .scroll-button:hover {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(69, 178, 157, 1);
 }
 
 .scroll-button svg {
@@ -316,11 +318,11 @@ onUnmounted(() => {
 .ai-responding-hint {
   text-align: center;
   padding: 10px;
-  background-color: #f0f0f0;
+  background-color: #e6eded;
   border-radius: 5px;
   margin: 10px 0;
   font-style: italic;
-  color: #666;
+  color: #45b29d;
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -334,7 +336,7 @@ onUnmounted(() => {
   display: flex;
   padding: 10px;
   background-color: #ffffff;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #d1dada;
 }
 
 textarea {
@@ -342,7 +344,7 @@ textarea {
   height: 40px;
   resize: none;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #d1dada;
   border-radius: 20px;
   margin-right: 10px;
   font-size: 14px;
@@ -352,20 +354,20 @@ textarea {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color: #007bff;
+  color: #45b29d;
   transition: color 0.3s;
 }
 
 .send-button:hover {
-  color: #0056b3;
+  color: #3a9683;
 }
 
 .send-button.cancel-button {
-  color: #dc3545;
+  color: #d68f8f;
 }
 
 .send-button.cancel-button:hover {
-  color: #bd2130;
+  color: #c27676;
 }
 
 .send-button:disabled {
@@ -387,7 +389,7 @@ textarea {
 }
 
 .dialog-content {
-  background-color: white;
+  background-color: #ffffff;
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -396,7 +398,7 @@ textarea {
 .dialog-content button {
   margin-top: 10px;
   padding: 5px 10px;
-  background-color: #007bff;
+  background-color: #45b29d;
   color: white;
   border: none;
   border-radius: 3px;
@@ -404,7 +406,7 @@ textarea {
 }
 
 .dialog-content button:hover {
-  background-color: #0056b3;
+  background-color: #3a9683;
 }
 
 @media (max-width: 768px) {

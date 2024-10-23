@@ -38,30 +38,34 @@
       </div>
     </div>
     <div v-if="chatStore.isWaitingForResponse" class="ai-responding-hint">AI 正在回覆中... 按下 ESC 鍵可終止回覆</div>
-    <div class="chat-input">
-      <textarea v-model="userInput" @keyup.enter.prevent="sendMessage" @keyup.esc="cancelResponse" placeholder="請輸入訊息..." ref="inputTextarea"></textarea>
-      <button
-        @click="chatStore.isWaitingForResponse ? cancelResponse() : sendMessage()"
-        class="send-button"
-        :class="{ 'cancel-button': chatStore.isWaitingForResponse }"
-      >
-        <svg v-if="!chatStore.isWaitingForResponse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-        </svg>
-      </button>
+    <div class="chat-input-container">
+      <CommonQuestions :show="showCommonQuestions" :questions="commonQuestions" @select="sendCommonQuestion" />
+      <div class="chat-input">
+        <textarea v-model="userInput" @keyup.enter.prevent="sendMessage" @keyup.esc="cancelResponse" placeholder="請輸入訊息..." ref="inputTextarea"></textarea>
+        <button
+          @click="chatStore.isWaitingForResponse ? cancelResponse() : sendMessage()"
+          class="send-button"
+          :class="{ 'cancel-button': chatStore.isWaitingForResponse }"
+        >
+          <svg v-if="!chatStore.isWaitingForResponse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, nextTick, watch, onUnmounted } from "vue";
+import { ref, onMounted, nextTick, watch, onUnmounted, computed } from "vue";
 import { ButtonChatMessage, TextChatMessage, useChatStore } from "@/stores/chatStore";
 import TextMessageComponent from "@/components/messages/TextMessage.vue";
 import ButtonMessageComponent from "@/components/messages/ButtonMessage.vue";
 import LoadingMessage from "@/components/messages/LoadingMessage.vue";
+import CommonQuestions from "@/components/messages/CommonQuestions.vue";
 
 const chatStore = useChatStore();
 const userInput = ref("");
@@ -72,6 +76,20 @@ const responseTimeout = ref<number | null>(null);
 
 const showDialog = ref(false);
 const dialogMessage = ref("");
+
+// 常見問題列表
+const commonQuestions = ["如何重置密碼？", "如何更新個人資料？", "如何聯繫客戶支援？", "如何取消訂閱？"];
+
+/** 是否顯示常見問題 */
+const showCommonQuestions = computed<boolean>(() => {
+  return (chatStore.currentChat && chatStore.currentChat.messages.length === 0) ?? false;
+});
+
+// 處理常見問題點擊
+const sendCommonQuestion = (question: string) => {
+  userInput.value = question;
+  sendMessage();
+};
 
 const handleScroll = () => {
   if (chatMessages.value) {
@@ -306,6 +324,10 @@ onUnmounted(() => {
   position: sticky;
   bottom: 0;
   z-index: 10;
+}
+
+.chat-input-container {
+  position: relative;
 }
 
 .chat-input {

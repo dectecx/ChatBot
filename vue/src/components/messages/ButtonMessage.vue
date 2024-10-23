@@ -46,8 +46,6 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
 </script>
 
 <style scoped>
-@import "@/assets/styles/common.css";
-
 .message {
   display: flex;
   align-items: flex-start;
@@ -106,16 +104,25 @@ const handleButtonClick = (button: { action: string; payload?: string }) => {
 }
 
 .button-group button {
+  flex: 1;
+  min-width: 100px;
   padding: 6px 12px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .button-group button:hover {
   background-color: #0056b3;
+}
+
+/* 確保內容不會溢出容器 */
+.message,
+.message-content {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 </style>

@@ -33,9 +33,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import "@/assets/styles/common.css";
-@import "@/assets/styles/chat.css";
-
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -58,18 +55,18 @@ onMounted(() => {
 .logo {
   height: 40px;
   width: auto;
-  display: block; /* 確保 logo 垂直居中 */
+  display: block;
 }
 
 .toggle-sidebar-btn {
   display: flex;
   align-items: center;
-  background-color: #3c4c5e;
+  background: none;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 5px;
   font-size: 14px;
   transition: background-color 0.3s ease;
 }
@@ -79,29 +76,24 @@ onMounted(() => {
 }
 
 .toggle-sidebar-btn svg {
-  width: 20px;
-  height: 20px;
   fill: #ffffff;
   margin-right: 8px;
 }
 
-.toggle-sidebar-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-}
-
-.toggle-sidebar-btn svg {
-  width: 24px;
-  height: 24px;
-  fill: #ffffff;
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
 .sidebar {
   width: 250px;
+  background-color: #f0f0f0;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
   transition: width 0.3s ease-in-out;
-  overflow: hidden;
 }
 
 .sidebar-hidden {

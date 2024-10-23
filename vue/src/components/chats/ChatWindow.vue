@@ -237,7 +237,6 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  transition: margin-left 0.3s ease-in-out;
 }
 
 .chat-header {
@@ -248,8 +247,8 @@ onUnmounted(() => {
 }
 
 .chat-messages-container {
-  position: relative;
   flex: 1;
+  position: relative;
   overflow: hidden;
 }
 

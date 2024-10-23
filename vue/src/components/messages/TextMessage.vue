@@ -83,7 +83,56 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-@import "@/assets/styles/common.css";
+.message {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  max-width: 80%;
+}
+
+.assistant {
+  margin-right: auto;
+}
+
+.user {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-content {
+  padding: 10px 15px;
+  border-radius: 18px;
+  position: relative;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+.assistant-icon {
+  margin-right: 10px;
+  width: 30px;
+  height: 30px;
+  background-color: #e6e6e6;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.assistant-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #666;
+}
 
 .user .message-content {
   background-color: #3c4d5e;
@@ -106,5 +155,12 @@ onUnmounted(() => {
 
 .user .message-time {
   align-self: flex-end;
+}
+
+/* 確保內容不會溢出容器 */
+.message,
+.message-content {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 </style>

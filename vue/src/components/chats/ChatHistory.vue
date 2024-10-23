@@ -22,6 +22,7 @@
 
 <script lang="ts" setup>
 import { ChatMessage, useChatStore } from "@/stores/chatStore";
+import { onMounted } from "vue";
 
 const chatStore = useChatStore();
 
@@ -67,6 +68,13 @@ const formatHistoryTime = (chatId: number) => {
   }
   return "";
 };
+
+onMounted(() => {
+  // 預設啟動一個聊天室
+  if (chatStore.chatHistory.length === 0) {
+    startNewChat();
+  }
+});
 </script>
 
 <style scoped>

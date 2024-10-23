@@ -17,19 +17,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from "vue";
 import { useChatStore } from "@/stores/chatStore";
 import ChatHistoryComponent from "@/components/chats/ChatHistory.vue";
 import ChatWindowComponent from "@/components/chats/ChatWindow.vue";
 
 const chatStore = useChatStore();
-
-onMounted(() => {
-  if (chatStore.chatHistory.length === 0) {
-    // TODO: 待補預設啟動一個聊天室
-    // startNewChat();
-  }
-});
 </script>
 
 <style scoped>
